@@ -1,4 +1,4 @@
-class News:
+class NewsItem:
     url: str
     title: str
     text: str
