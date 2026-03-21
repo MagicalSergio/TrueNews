@@ -1,0 +1,9 @@
+services:
+  app:
+    build: .
+    image: true-news
+    volumes:
+      - "./src:/app/src"
+      - "./main.py:/app/main.py"
+      - "./tmp:/app/tmp"
+    command: ["uv", "run", "python", "main.py"]

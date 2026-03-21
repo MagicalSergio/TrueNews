@@ -2,7 +2,7 @@ import asyncio
 import traceback
 from selectolax.parser import HTMLParser
 from httpx import AsyncClient
-from news_item import NewsItem
+from src.parsers.news_item import NewsItem
 
 class KommersantParser:
     DOCS_URL = 'https://www.kommersant.ru/doc/'
