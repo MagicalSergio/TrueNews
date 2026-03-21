@@ -1,6 +1,6 @@
 import asyncio
 import json
-from kommersant_parser import KommersantParser
+from parsers.kommersant_parser import KommersantParser
 
 async def main():
     news = await KommersantParser().get_entities()
@@ -10,4 +10,3 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.run(main())
-    

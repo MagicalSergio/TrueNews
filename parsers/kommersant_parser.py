@@ -9,7 +9,7 @@ class KommersantParser:
     NEWS_ROOT_URL = "https://www.kommersant.ru/lenta?from=all_lenta"
     AJAX_REQUEST_URL = "https://www.kommersant.ru/listpage/lazyloaddocs?regionid=77&listtypeid=3&listid=77&date=&intervaltype=&idafter="
     
-    async def get_entities(self, count = 40):
+    async def get_entities(self, count = 5):
         async with AsyncClient() as http_client:
             self.http_client = http_client
             try:
