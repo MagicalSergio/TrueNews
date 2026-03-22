@@ -1,10 +1,6 @@
 import asyncio
-import builtins
 from src.parsers.kommersant_parser import KommersantParser
 from src.db.db_conn import DBConn
-from icecream import ic
-
-builtins.ic = ic
 
 async def main():
     # news = await KommersantParser().get_entities()

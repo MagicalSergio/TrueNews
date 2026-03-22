@@ -1,8 +1,11 @@
 run:
 	docker compose up
 
-build-run:
-	docker compose up -d --build
+run-d:
+	docker compose up -d
 
-build-run-verbose:
+build:
 	docker compose up --build
+
+build-d:
+	docker compose up -d --build
