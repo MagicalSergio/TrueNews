@@ -9,11 +9,11 @@ from icecream import ic
 from typing import List
 
 
-class BaseMappedClass(DeclarativeBase):
+class Base(DeclarativeBase):
     pass
 
 
-class UserEntity(BaseMappedClass):
+class UserEntity(Base):
     __tablename__ = "user_entities"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(30), nullable=False)
@@ -26,7 +26,7 @@ class UserEntity(BaseMappedClass):
         return f"User(id={self.id}, name={self.name}, last_name={self.last_name})"
 
 
-class UserAddressEntity(BaseMappedClass):
+class UserAddressEntity(Base):
     __tablename__ = "user_address_entities"
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id = mapped_column(ForeignKey("user_entities.id"))
@@ -41,7 +41,7 @@ class DBConn:
     def __init__(self):
         self.engine = create_engine("sqlite+pysqlite:///:memory:", echo=True)
 
-        BaseMappedClass.metadata.create_all(self.engine)
+        Base.metadata.create_all(self.engine)
 
         with Session(self.engine) as session:
             result = session.execute(
