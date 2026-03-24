@@ -2,15 +2,17 @@ import asyncio
 import traceback
 from selectolax.parser import HTMLParser
 from httpx import AsyncClient
-from src.parsers.news_item import NewsItem
+from src.models.news_item import NewsItem
+from src.util.date_normalizer import DateNormalizer
+from src.domain.parsers.base_parser import BaseParser
 
 
-class KommersantParser:
+class KommersantParser(BaseParser):
     DOCS_URL = "https://www.kommersant.ru/doc/"
     NEWS_ROOT_URL = "https://www.kommersant.ru/lenta?from=all_lenta"
     AJAX_REQUEST_URL = "https://www.kommersant.ru/listpage/lazyloaddocs?regionid=77&listtypeid=3&listid=77&date=&intervaltype=&idafter="
 
-    async def get_entities(self, count=5):
+    async def get_entities(self, count=5) -> list[NewsItem]:
         async with AsyncClient() as http_client:
             self.http_client = http_client
             try:
@@ -24,12 +26,18 @@ class KommersantParser:
 
     async def _parse_article(self, url):
         response = await self.http_client.get(url)
+
         tree = HTMLParser(response.text)
         article_node = tree.css_first(f'article[data-article-url="{url}"]')
         title = article_node.css_first("h1").text().replace("\n", "").strip()
+
         paragraph_nodes = article_node.css(".doc__text")
         text = " ".join([p.text() for p in paragraph_nodes])
-        return NewsItem(url, title, text)
+
+        iso_8601_time = article_node.css_first("time").attributes["datetime"]
+        time = DateNormalizer.from_iso_8601(iso_8601_time)
+
+        return NewsItem(url, title, text, time)
 
     async def _get_links(self, count):
         links = await self._get_root_page_links()
