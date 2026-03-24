@@ -13,25 +13,23 @@ class Base(DeclarativeBase):
     pass
 
 
-class UserEntity(Base):
-    __tablename__ = "user_entities"
+class UserDB(Base):
+    __tablename__ = "users"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(30), nullable=False)
     last_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    addresses: Mapped[List["UserAddressEntity"]] = relationship(
-        back_populates="addresses"
-    )
+    addresses: Mapped[List["AddressUserDB"]] = relationship(back_populates="addresses")
 
     def __repr__(self) -> str:
         return f"User(id={self.id}, name={self.name}, last_name={self.last_name})"
 
 
-class UserAddressEntity(Base):
-    __tablename__ = "user_address_entities"
+class AddressUserDB(Base):
+    __tablename__ = "addresses_user"
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id = mapped_column(ForeignKey("user_entities.id"))
     email_address: Mapped[str] = mapped_column(String(50), nullable=False)
-    user: Mapped[UserEntity] = relationship(back_populates="user")
+    user: Mapped[UserDB] = relationship(back_populates="user")
 
     def __repr__(self) -> str:
         return f"UserAddress(id={self.id}, user_id={self.user_id}, email_address={self.email_address})"
