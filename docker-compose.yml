@@ -6,4 +6,5 @@ services:
       - "./src:/app/src"
       - "./main.py:/app/main.py"
       - "./tmp:/app/tmp"
-    command: ["uv", "run", "python", "main.py"]
+      - "./data:/app/data"
+    command: [ "uv", "run", "python", "main.py" ]

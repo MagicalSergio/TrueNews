@@ -1,50 +1,38 @@
-from sqlalchemy import (
-    create_engine,
-    text,
-    String,
-    ForeignKey,
-)
-from sqlalchemy.orm import Session, DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy import create_engine
 from icecream import ic
-from typing import List
+from src.config import PROJECT_ROOT
+from .tables.main_base import MainBase
+import importlib
+import pkgutil
+from src.util.singleton import singleton
+import re
 
 
-class Base(DeclarativeBase):
-    pass
-
-
-class UserDB(Base):
-    __tablename__ = "users"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(30), nullable=False)
-    last_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    addresses: Mapped[List["AddressUserDB"]] = relationship(back_populates="addresses")
-
-    def __repr__(self) -> str:
-        return f"User(id={self.id}, name={self.name}, last_name={self.last_name})"
-
-
-class AddressUserDB(Base):
-    __tablename__ = "addresses_user"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    user_id = mapped_column(ForeignKey("user_entities.id"))
-    email_address: Mapped[str] = mapped_column(String(50), nullable=False)
-    user: Mapped[UserDB] = relationship(back_populates="user")
-
-    def __repr__(self) -> str:
-        return f"UserAddress(id={self.id}, user_id={self.user_id}, email_address={self.email_address})"
-
-
+@singleton
 class DBConn:
+    _DB_PATH = PROJECT_ROOT / "data" / "app.db"
+    _TABLES_PATH = PROJECT_ROOT / "src" / "db" / "tables"
+
+    _engine = None
+
     def __init__(self):
-        self.engine = create_engine("sqlite+pysqlite:///:memory:", echo=True)
+        self._check_db_existence()
+        self._load_tables()
+        self._engine = create_engine(f"sqlite:///{self._DB_PATH}")
+        MainBase.metadata.create_all(self._engine)
 
-        Base.metadata.create_all(self.engine)
+    def get_engine(self):
+        return self._engine
 
-        with Session(self.engine) as session:
-            result = session.execute(
-                text('select name from sqlite_master where type="table" order by name')
-            )
+    def _load_tables(self):
+        modules = [m for m in pkgutil.iter_modules([str(self._TABLES_PATH)])]
+        table_modules = [m for m in modules if m.name.startswith("table_")]
+        table_paths = [f"{self._TABLES_PATH}/{m.name}.py" for m in table_modules]
+        for tp in table_paths:
+            module = re.search(r"(src/).+[^(.py)]", tp).group(0).replace("/", ".")
+            importlib.import_module(module)
 
-            items = result.all()
-            ic(items)
+    def _check_db_existence(self):
+        if not self._DB_PATH.exists():
+            with open(self._DB_PATH, "w"):
+                pass

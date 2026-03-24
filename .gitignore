@@ -180,4 +180,7 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
-news.json
+# DB
+data/app.db
+
+tmp/news.json
