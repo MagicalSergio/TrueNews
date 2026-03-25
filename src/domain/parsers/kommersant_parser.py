@@ -7,11 +7,11 @@ from src.util.date_normalizer import DateNormalizer
 from src.domain.parsers.base_parser import BaseParser
 from src.util.smart_http_client import SmartHttpClient
 
+DOCS_URL = "https://www.kommersant.ru/doc/"
+NEWS_ROOT_URL = "https://www.kommersant.ru/lenta?from=all_lenta"
+AJAX_REQUEST_URL = "https://www.kommersant.ru/listpage/lazyloaddocs?regionid=77&listtypeid=3&listid=77&date=&intervaltype=&idafter="
 
 class KommersantParser(BaseParser):
-    DOCS_URL = "https://www.kommersant.ru/doc/"
-    NEWS_ROOT_URL = "https://www.kommersant.ru/lenta?from=all_lenta"
-    AJAX_REQUEST_URL = "https://www.kommersant.ru/listpage/lazyloaddocs?regionid=77&listtypeid=3&listid=77&date=&intervaltype=&idafter="
     _http_client: AsyncClient
 
     async def get_entities(self, count=5) -> list[NewsItem]:
@@ -50,7 +50,7 @@ class KommersantParser(BaseParser):
         return links[:count]
 
     async def _get_root_page_links(self):
-        root_page = await self._http_client.get(KommersantParser.NEWS_ROOT_URL)
+        root_page = await self._http_client.get(NEWS_ROOT_URL)
         tree = HTMLParser(root_page.text)
         articles = tree.css("article[data-article-url]")
         return [a.attributes["data-article-url"] for a in articles]
@@ -62,7 +62,7 @@ class KommersantParser(BaseParser):
         return [self._construct_doc_url_for(i["DocsID"]) for i in items]
 
     def _construct_ajax_req_url(self, id):
-        return f"{KommersantParser.AJAX_REQUEST_URL}{id}"
+        return f"{AJAX_REQUEST_URL}{id}"
 
     def _construct_doc_url_for(self, id):
-        return f"{KommersantParser.DOCS_URL}{id}"
+        return f"{DOCS_URL}{id}"
