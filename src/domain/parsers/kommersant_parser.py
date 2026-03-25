@@ -5,16 +5,17 @@ from httpx import AsyncClient
 from src.models.news_item import NewsItem
 from src.util.date_normalizer import DateNormalizer
 from src.domain.parsers.base_parser import BaseParser
+from src.util.smart_http_client import SmartHttpClient
 
 
 class KommersantParser(BaseParser):
     DOCS_URL = "https://www.kommersant.ru/doc/"
     NEWS_ROOT_URL = "https://www.kommersant.ru/lenta?from=all_lenta"
     AJAX_REQUEST_URL = "https://www.kommersant.ru/listpage/lazyloaddocs?regionid=77&listtypeid=3&listid=77&date=&intervaltype=&idafter="
-    _http_client = None
+    _http_client: AsyncClient
 
     async def get_entities(self, count=5) -> list[NewsItem]:
-        async with AsyncClient() as http_client:
+        async with SmartHttpClient() as http_client:
             self._http_client = http_client
             try:
                 links = await self._get_links(count)
