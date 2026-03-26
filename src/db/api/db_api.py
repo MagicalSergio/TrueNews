@@ -70,7 +70,7 @@ class DBApi:
             session.add(source_provider)
             session.commit()
 
-    def insert_parsers(self, *dtos: InsertSou)
+    # def insert_parsers(self, *dtos: InsertSou)
 
     def get_source_provider(self, id) -> SourceProviderDBEntity | None:
         try:
