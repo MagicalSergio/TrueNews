@@ -1,6 +1,5 @@
 import asyncio
 from src.domain.parser_loader import ParserLoader
-import json
 from icecream import ic
 from src.db.api.db_api import DBApi, SaveSourceProviderDTO, SaveSiteNewsItemDTO
 from src.models.news_item import NewsItem
