@@ -61,16 +61,23 @@ class DBApi:
                 session.add(source)
             session.commit()
 
-    def insert_source_providers(self, dto: InsertSourceProvidersDTO):
+    def insert_source_providers(self, *dtos: InsertSourceProvidersDTO):
         with Session(self._conn.get_engine()) as session:
-            source_provider = SourceProviderDBEntity()
-            source_provider.system_name = dto.system_name
-            source_provider.public_name = dto.public_name
-            source_provider.canonical_url = dto.canonical_url
-            session.add(source_provider)
+            for dto in dtos:
+                source_provider = SourceProviderDBEntity()
+                source_provider.system_name = dto.system_name
+                source_provider.public_name = dto.public_name
+                source_provider.canonical_url = dto.canonical_url
+                session.add(source_provider)
             session.commit()
 
-    # def insert_parsers(self, *dtos: InsertSou)
+    def insert_parsers(self, *dtos: InsertParsersDTO):
+        with Session(self._conn.get_engine()) as session:
+            for dto in dtos:
+                parser = ParserDBEntity()
+                parser.system_name = dto.system_name
+                parser.module = dto.module
+            session.commit()
 
     def get_source_provider(self, id) -> SourceProviderDBEntity | None:
         try:

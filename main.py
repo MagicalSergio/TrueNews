@@ -1,26 +1,34 @@
 import asyncio
-from src.scanner.parser_loader import ParserLoader
+# from src.scanner.parser_loader import ParserLoader
 from icecream import ic
 from src.db.api.db_api import DBApi, InsertSourceProvidersDTO, InsertSourcesDTO
 from src.scanner.models.news_item import NewsItem
+from src.scanner import ParserLoader
 
 
 async def main():
-    db_api = DBApi()
-    # db_api.insert_sources(
-        # InsertSourcesDTO(
-            # source_provider_id=
-        # )
-    # )
+    test = ParserLoader().instantiate_parser()
+    # db_api = DBApi()
     # db_api.insert_source_providers(
     #     InsertSourceProvidersDTO(
     #         system_name="ria",
     #         public_name="РИА Новости",
     #         canonical_url="https://ria.ru/",
+    #     ),
+    #     InsertSourceProvidersDTO(
+    #         system_name="kommersant",
+    #         public_name="Коммерсант",
+    #         canonical_url="https://www.kommersant.ru/",
+    #     ),
+    # )
+    # db_api.insert_sources(
+    #     InsertSourcesDTO(
+    #         source_provider_id=
     #     )
     # )
+    # db_api.insert_source_providers(
 
-    
+    # )
 
     # db_api = DBApi()
     # source_provider = db_api.get_source_provider(1)
