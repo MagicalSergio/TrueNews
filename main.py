@@ -7,11 +7,11 @@ from src.scanner.models.news_item import NewsItem
 
 async def main():
     db_api = DBApi()
-    db_api.insert_sources(
+    # db_api.insert_sources(
         # InsertSourcesDTO(
             # source_provider_id=
         # )
-    )
+    # )
     # db_api.insert_source_providers(
     #     InsertSourceProvidersDTO(
     #         system_name="ria",
