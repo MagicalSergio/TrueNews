@@ -8,9 +8,9 @@ class ParserDBEntity(MainBase):
     __tablename__ = "parsers"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    system_name: Mapped[str] = mapped_column(String(64), nullable=False)
+    system_name: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     module: Mapped[str] = mapped_column(String(64), nullable=False)
-    kwargs_json: Mapped[str] = mapped_column(Text, nullable=False)
+    kwargs_json: Mapped[str] = mapped_column(Text, nullable=True)
     created_at: Mapped[int] = mapped_column(
         nullable=False, default=lambda: int(time.time())
     )
