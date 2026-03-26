@@ -2,9 +2,9 @@ import asyncio
 import traceback
 from selectolax.parser import HTMLParser
 from httpx import AsyncClient
-from src.models.news_item import NewsItem
+from src.scanner.models.news_item import NewsItem
 from src.util.date_normalizer import DateNormalizer
-from src.domain.parsers.base_parser import BaseParser
+from src.scanner.parsers.base_parser import BaseParser
 from src.util.smart_http_client import SmartHttpClient
 
 
@@ -36,7 +36,9 @@ class RiaParser(BaseParser):
         paragraph_nodes = tree.css(".article__text")
         text = " ".join([p.text() for p in paragraph_nodes])
 
-        iso_8601_time = tree.css_first("[property=\"article:published_time\"]").attributes["content"]
+        iso_8601_time = tree.css_first(
+            '[property="article:published_time"]'
+        ).attributes["content"]
         time = DateNormalizer.from_iso_8601(iso_8601_time)
 
         return NewsItem(url, title, text, time)
@@ -46,7 +48,7 @@ class RiaParser(BaseParser):
 
         while len(links) < count:
             last_link_id = links[-1].split("-")[-1].split(".")[0]
-            last_link_date = links[-1].split('/')[-2]
+            last_link_date = links[-1].split("/")[-2]
 
             new_links, last_link_time = await self._get_links_and_last_news_time(
                 self._construct_req_url(last_link_id, last_link_date, last_link_time)
@@ -63,7 +65,7 @@ class RiaParser(BaseParser):
         articles = [item.css_first(".list-item__image") for item in items]
 
         last_item_time = items[-1].css_first(".list-item__info-item").text()
-        last_item_time = last_item_time[:2] + last_item_time[3:] +"00"
+        last_item_time = last_item_time[:2] + last_item_time[3:] + "00"
 
         return [a.attributes["href"] for a in articles], last_item_time
 
