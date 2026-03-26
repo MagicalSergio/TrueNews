@@ -1,4 +1,4 @@
-from src.domain.parsers.base_parser import BaseParser
+from src.scanner.parsers.base_parser import BaseParser
 from src.config import PROJECT_ROOT
 import pkgutil
 import importlib
@@ -18,10 +18,10 @@ class ParserLoader:
         return self._parsers
 
     def _load_parsers(self) -> list[type[BaseParser]]:
-        parsers_dir = PROJECT_ROOT / "src" / "domain" / "parsers"
+        parsers_dir = PROJECT_ROOT / "src" / "scanner" / "parsers"
         modules = [m for m in pkgutil.iter_modules([str(parsers_dir)])]
         for m in modules:
-            imported_m = importlib.import_module(f"src.domain.parsers.{m.name}")
+            imported_m = importlib.import_module(f"src.scanner.parsers.{m.name}")
             classes = inspect.getmembers(imported_m, inspect.isclass)
             for cls in classes:
                 if issubclass(cls[1], BaseParser) and cls[1] is not BaseParser:

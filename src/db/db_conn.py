@@ -1,8 +1,7 @@
+from src.db.tables import *
 from sqlalchemy import create_engine, Engine
 from icecream import ic
 from src.config import PROJECT_ROOT
-from src.db.tables.main_base import MainBase
-from src.db.tables import *
 from src.util.singleton import singleton
 
 

@@ -2,9 +2,9 @@ import asyncio
 import traceback
 from selectolax.parser import HTMLParser
 from httpx import AsyncClient
-from src.models.news_item import NewsItem
+from src.scanner.models.news_item import NewsItem
 from src.util.date_normalizer import DateNormalizer
-from src.domain.parsers.base_parser import BaseParser
+from src.scanner.parsers.base_parser import BaseParser
 from src.util.smart_http_client import SmartHttpClient
 
 DOCS_URL = "https://www.kommersant.ru/doc/"

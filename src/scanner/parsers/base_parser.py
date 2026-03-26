@@ -1,4 +1,4 @@
-from src.models.news_item import NewsItem
+from src.scanner.models.news_item import NewsItem
 from abc import ABC, abstractmethod
 
 
