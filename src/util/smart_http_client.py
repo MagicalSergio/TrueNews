@@ -31,45 +31,8 @@ USER_AGENTS = [
 
 
 class SmartHttpClient(AsyncClient):
-    def __init__(
-        self,
-        *,
-        auth=None,
-        params=None,
-        headers=None,
-        cookies=None,
-        verify=True,
-        cert=None,
-        http1=True,
-        http2=False,
-        proxy=None,
-        mounts=None,
-        follow_redirects=False,
-        event_hooks=None,
-        base_url="",
-        transport=None,
-        trust_env=True,
-        default_encoding="utf-8",
-    ):
-        super().__init__(
-            auth=auth,
-            params=params,
-            headers=headers,
-            cookies=cookies,
-            verify=verify,
-            cert=cert,
-            http1=http1,
-            http2=http2,
-            proxy=proxy,
-            mounts=mounts,
-            follow_redirects=follow_redirects,
-            event_hooks=event_hooks,
-            base_url=base_url,
-            transport=transport,
-            trust_env=trust_env,
-            default_encoding=default_encoding,
-        )
-
+    def __init__(self, **kwargs):
+        super().__init__(*kwargs)
         self.semaphore = asyncio.Semaphore()
 
     async def get(
