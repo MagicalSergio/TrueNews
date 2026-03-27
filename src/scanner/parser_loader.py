@@ -10,13 +10,8 @@ import re
 
 @singleton
 class ParserLoader:
-    _parsers: list[BaseParser] = []
-
     def __init__(self):
-        self._load_parsers()
-
-    def all(self):
-        return self._parsers
+        pass
 
     def instantiate_parser(self, module: str = "", **kwargs) -> BaseParser:
         parsers_dir = find_root(__file__, ".scanner_root") / "parsers"
