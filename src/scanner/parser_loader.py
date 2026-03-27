@@ -14,7 +14,7 @@ class ParserLoader:
         pass
 
     def instantiate_parser(self, module: str = "", **kwargs) -> BaseParser:
-        parsers_dir = find_root(__file__, ".scanner_root") / "parsers"
+        parsers_dir = find_root(__file__, "__init__.py") / "parsers"
         module = next(
             (
                 module
