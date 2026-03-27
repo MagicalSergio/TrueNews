@@ -19,7 +19,7 @@ class ParserLoader:
             (
                 module
                 for module in pkgutil.iter_modules([str(parsers_dir)])
-                if module.name == "kommersant_parser"
+                if module.name == module
             ),
             None,
         )
@@ -38,7 +38,7 @@ class ParserLoader:
                 for cls in classes
                 if issubclass(cls[1], BaseParser) and cls[1] is not BaseParser
             ),
-            None
+            None,
         )
 
         if not parser:
