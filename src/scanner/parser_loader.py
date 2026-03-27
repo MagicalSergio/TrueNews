@@ -1,5 +1,4 @@
 from src.scanner.parsers import *
-from src.config import PROJECT_ROOT
 import pkgutil
 import importlib
 import inspect
@@ -51,12 +50,3 @@ class ParserLoader:
             raise Exception("Parser class not found")
 
         return parser(**kwargs)
-
-    def _load_parsers(self) -> list[type[BaseParser]]:
-        parsers_dir = PROJECT_ROOT / "src" / "scanner" / "parsers"
-        for m in pkgutil.iter_modules([str(parsers_dir)]):
-            imported_m = importlib.import_module(f"src.scanner.parsers.{m.name}")
-            classes = inspect.getmembers(imported_m, inspect.isclass)
-            for cls in classes:
-                if issubclass(cls[1], BaseParser) and cls[1] is not BaseParser:
-                    self._parsers.append(cls[1]())
