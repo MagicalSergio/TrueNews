@@ -2,6 +2,7 @@ from httpx import AsyncClient
 import asyncio
 import random
 from icecream import ic
+import curl_cffi
 
 
 USER_AGENTS = [
@@ -31,24 +32,25 @@ USER_AGENTS = [
 
 
 class SmartHttpClient(AsyncClient):
-    def __init__(self, **kwargs):
-        super().__init__(*kwargs)
-        self.semaphore = asyncio.Semaphore()
-
-    async def get(
+    def __init__(
         self,
-        url,
+        impersonate: curl_cffi.BrowserTypeLiteral | None = "chrome",
+        **kwargs,
     ):
+        super().__init__(**kwargs)
+
+        self.semaphore = asyncio.Semaphore()
+        self.session = curl_cffi.AsyncSession(
+            impersonate=impersonate if impersonate is not None else "chrome",
+            headers=[f"X-Forwarded-For: {self._generate_ip()}"],
+        )
+
+    async def get(self, url):
         async with self.semaphore:
+            ic(url)
+            ic(self.session.headers)
             await asyncio.sleep(random.uniform(1, 3))
-            return await super().get(
-                url,
-                headers=[
-                    ["X-Forwarded-For", f"{self._generate_ip()}"],
-                    ["User-Agent", f"{self._random_ua()}"],
-                ],
-                follow_redirects=True,
-            )
+            return await self.session.get(url)
 
     def _generate_ip(self):
         while True:

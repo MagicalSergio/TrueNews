@@ -15,7 +15,7 @@ NEXT_REQUEST_URL_WITH_FORM = "https://ria.ru/services/lenta/more.html?id={id}&da
 class RiaParser(BaseParser):
     _http_client: AsyncClient
 
-    async def get_entities(self, count=25) -> list[NewsItem]:
+    async def get_entities(self, count=20) -> list[NewsItem]:
         async with SmartHttpClient() as http_client:
             self._http_client = http_client
             try:

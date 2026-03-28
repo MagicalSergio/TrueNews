@@ -1,0 +1,28 @@
+{
+    "root_url": "https://m.interfax.ru",
+    "feed_url": "https://m.interfax.ru/news/",
+    "feed_nodes": {
+        "link": {
+            "selector": "td a",
+            "content": "[href]"
+        }
+    },
+    "article_nodes": {
+        "title": {
+            "selector": "#newsHeadlineContainer",
+            "content": "text"
+        },
+        "time": {
+            "selector": "#newsDateContainer",
+            "content": "text"
+        },
+        "text": {
+            "selector": "* .txt p",
+            "content": "text"
+        }
+    },
+    "append_params": {
+        "utm_auth": "false"
+    },
+    "impersonate": "chrome131_android"
+}

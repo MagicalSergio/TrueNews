@@ -13,13 +13,13 @@ class ParserLoader:
     def __init__(self):
         pass
 
-    def instantiate_parser(self, module: str = "", **kwargs) -> BaseParser:
+    def instantiate_parser(self, module_name: str = "", **kwargs) -> BaseParser:
         parsers_dir = find_root(__file__, "__init__.py") / "parsers"
         module = next(
             (
                 module
                 for module in pkgutil.iter_modules([str(parsers_dir)])
-                if module.name == module
+                if module.name == module_name
             ),
             None,
         )

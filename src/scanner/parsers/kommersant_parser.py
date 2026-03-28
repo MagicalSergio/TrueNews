@@ -14,7 +14,7 @@ AJAX_REQUEST_URL = "https://www.kommersant.ru/listpage/lazyloaddocs?regionid=77&
 class KommersantParser(BaseParser):
     _http_client: AsyncClient
 
-    async def get_entities(self, count=5) -> list[NewsItem]:
+    async def get_entities(self, count=20) -> list[NewsItem]:
         async with SmartHttpClient() as http_client:
             self._http_client = http_client
             try:
