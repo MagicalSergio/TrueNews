@@ -13,7 +13,7 @@ class ParserLoader:
     def __init__(self):
         pass
 
-    def instantiate_parser(self, module_name: str = "", **kwargs) -> BaseParser:
+    def instantiate_parser(self, module_name: str, system_name: str, **kwargs) -> BaseParser:
         parsers_dir = find_root(__file__, "__init__.py") / "parsers"
         module = next(
             (
@@ -44,4 +44,4 @@ class ParserLoader:
         if not parser:
             raise Exception("Parser class not found")
 
-        return parser(**kwargs)
+        return parser(system_name, **kwargs)

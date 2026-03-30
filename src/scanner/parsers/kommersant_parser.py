@@ -1,5 +1,4 @@
 import asyncio
-import traceback
 from selectolax.parser import HTMLParser
 from httpx import AsyncClient
 from src.scanner.models.news_item import NewsItem
@@ -11,43 +10,57 @@ DOCS_URL = "https://www.kommersant.ru/doc/"
 NEWS_ROOT_URL = "https://www.kommersant.ru/lenta?from=all_lenta"
 AJAX_REQUEST_URL = "https://www.kommersant.ru/listpage/lazyloaddocs?regionid=77&listtypeid=3&listid=77&date=&intervaltype=&idafter="
 
+
 class KommersantParser(BaseParser):
     _http_client: AsyncClient
 
+    def __init__(self, system_name: str):
+        super().__init__(system_name)
+
+        self._http_client = SmartHttpClient()
+
     async def get_entities(self, count=20) -> list[NewsItem]:
-        async with SmartHttpClient() as http_client:
-            self._http_client = http_client
-            try:
-                links = await self._get_links(count)
-                parsing_coroutines = [self._parse_article(l) for l in links]
-                results = await asyncio.gather(*parsing_coroutines)
-                return results
-            except Exception:
-                traceback.print_exc()
-                return []
+        async with self._http_client:
+            links = await self._get_links(count)
+            results = await asyncio.gather(*[self._parse_article(l) for l in links])
+            return [r for r in results if r is not None]
 
-    async def _parse_article(self, url):
-        response = await self._http_client.get(url)
+    async def _parse_article(self, url) -> NewsItem | None:
+        try:
+            response = await self._http_client.get(url)
 
-        tree = HTMLParser(response.text)
-        article_node = tree.css_first(f'article[data-article-url="{url}"]')
-        title = article_node.css_first("h1").text().replace("\n", "").strip()
+            tree = HTMLParser(response.text)
+            article_node = tree.css_first(f'article[data-article-url="{url}"]')
+            title = article_node.css_first("h1").text().replace("\n", "").strip()
 
-        paragraph_nodes = article_node.css(".doc__text")
-        text = " ".join([p.text() for p in paragraph_nodes])
+            paragraph_nodes = article_node.css(".doc__text")
+            text = " ".join([p.text() for p in paragraph_nodes])
 
-        iso_8601_time = article_node.css_first("time").attributes["datetime"]
-        time = DateNormalizer.from_iso_8601(iso_8601_time)
+            iso_8601_time = article_node.css_first("time").attributes["datetime"]
+            time = DateNormalizer.from_iso_8601(iso_8601_time)
 
-        return NewsItem(url, title, text, time)
+            return NewsItem(url, title, text, time)
+        except:
+            self._logger.error(
+                f"Failed parse article for {url}",
+                exc_info=True,
+            )
+            return None
 
-    async def _get_links(self, count):
-        links = await self._get_root_page_links()
-        last_link_id = links[-1].split("/")[-1]
-        while len(links) < count:
-            links.extend(await self._get_ajax_links_after(last_link_id))
+    async def _get_links(self, count) -> list[str]:
+        try:
+            links = await self._get_root_page_links()
             last_link_id = links[-1].split("/")[-1]
-        return links[:count]
+            while len(links) < count:
+                links.extend(await self._get_ajax_links_after(last_link_id))
+                last_link_id = links[-1].split("/")[-1]
+            return links[:count]
+        except Exception:
+            self._logger.error(
+                f"Failed getting links for {NEWS_ROOT_URL}",
+                exc_info=True,
+            )
+            return []
 
     async def _get_root_page_links(self):
         root_page = await self._http_client.get(NEWS_ROOT_URL)

@@ -1,0 +1,6 @@
+from abc import ABC
+
+
+class ScannerABC(ABC):
+    def start(): ...
+    def stop(): ...

@@ -7,4 +7,5 @@ services:
       - "./main.py:/app/main.py"
       - "./tmp:/app/tmp"
       - "./data:/app/data"
-    command: [ "uv", "run", "python", "main.py" ]
+      - "./logs:/app/logs"
+    command: [ "nohup", "uv", "run", "python", "main.py" ]

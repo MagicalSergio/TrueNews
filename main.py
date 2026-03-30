@@ -1,16 +1,34 @@
 import asyncio
-from src.db.api.db_api import DBApi
-from src.scanner.source_handler import SourceHandler
+import signal
+from src.scanner.scanner_impl import ScannerImpl
+import logging
+import sys
+
+sys.stdout.reconfigure(line_buffering=True)
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[logging.FileHandler(f"logs/root.log", "+w")],
+)
 
 
 async def main():
-    sources_raw = DBApi().get_sources()
-    handlers: list[SourceHandler] = []
+    try:
+        scanner = ScannerImpl()
+        scanner.start()
 
-    for s in sources_raw:
-        handlers.append(SourceHandler(s.id))
+        stop_event = asyncio.Event()
 
-    await asyncio.gather(*[h.process() for h in handlers])
+        # Обработка сигналов для корректного завершения
+        loop = asyncio.get_running_loop()
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            loop.add_signal_handler(sig, stop_event.set)
+
+        await stop_event.wait()  # Ждём сигнала завершения
+        scanner.stop()
+    except Exception as e:
+        logging.critical()
 
 
 if __name__ == "__main__":

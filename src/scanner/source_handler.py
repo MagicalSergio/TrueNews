@@ -19,6 +19,7 @@ class SourceHandler:
                 self._parser_kwargs = {}
             self._parser_instance = ParserLoader().instantiate_parser(
                 self._parser_raw.module,
+                self._parser_raw.system_name,
                 **self._parser_kwargs,
             )
         except Exception as e:

@@ -319,6 +319,18 @@ wheels = [
 ]
 
 [[package]]
+name = "scheduler"
+version = "0.8.11"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typeguard" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/73/f2/56aaad8051752a321de1d8a04c80345e21f2c6e573fb9a1fb71f11141a41/scheduler-0.8.11.tar.gz", hash = "sha256:b2234a069448a617abbc511b9e18f48c4deb3dcd9dcc51721d9c90ef2943b72a", size = 32076, upload-time = "2026-02-15T22:43:29.519Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/be/f9/3e2e4944104b47e6b075fdc9cb890758ead01fb0d203d8508ecb9cc76680/scheduler-0.8.11-py3-none-any.whl", hash = "sha256:db55040e0f1c0824a9b02ff37fcecdcd10c2ee1d5b86d1761648981a555a00f8", size = 34379, upload-time = "2026-02-15T22:43:28.047Z" },
+]
+
+[[package]]
 name = "selectolax"
 version = "0.4.7"
 source = { registry = "https://pypi.org/simple" }
@@ -402,6 +414,7 @@ dependencies = [
     { name = "curl-cffi" },
     { name = "httpx" },
     { name = "icecream" },
+    { name = "scheduler" },
     { name = "selectolax" },
     { name = "sqlalchemy" },
 ]
@@ -413,8 +426,21 @@ requires-dist = [
     { name = "curl-cffi", specifier = ">=0.14.0" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "icecream", specifier = ">=2.1.10" },
+    { name = "scheduler", specifier = ">=0.8.11" },
     { name = "selectolax", specifier = ">=0.4.7" },
     { name = "sqlalchemy", specifier = ">=2.0.48" },
+]
+
+[[package]]
+name = "typeguard"
+version = "4.5.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2b/e8/66e25efcc18542d58706ce4e50415710593721aae26e794ab1dec34fb66f/typeguard-4.5.1.tar.gz", hash = "sha256:f6f8ecbbc819c9bc749983cc67c02391e16a9b43b8b27f15dc70ed7c4a007274", size = 80121, upload-time = "2026-02-19T16:09:03.392Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/91/88/b55b3117287a8540b76dbdd87733808d4d01c8067a3b339408c250bb3600/typeguard-4.5.1-py3-none-any.whl", hash = "sha256:44d2bf329d49a244110a090b55f5f91aa82d9a9834ebfd30bcc73651e4a8cc40", size = 36745, upload-time = "2026-02-19T16:09:01.6Z" },
 ]
 
 [[package]]
