@@ -7,6 +7,7 @@ from src.scanner.parsers.base_parser import BaseParser
 from src.util.smart_http_client import SmartHttpClient
 
 
+ROOT_URL = "https://ria.ru/"
 NEWS_ROOT_URL = "https://ria.ru/lenta/"
 NEXT_REQUEST_URL_WITH_FORM = "https://ria.ru/services/lenta/more.html?id={id}&date={date}T{time}&articlemask=lenta_common"
 
@@ -33,7 +34,7 @@ class RiaParser(BaseParser):
             title = tree.css_first(".article__title").text().replace("\n", "").strip()
 
             paragraph_nodes = tree.css(".article__text")
-            text = " ".join([p.text() for p in paragraph_nodes])
+            text = "\n ".join([p.text() for p in paragraph_nodes])
 
             iso_8601_time = tree.css_first(
                 '[property="article:published_time"]'
@@ -66,7 +67,7 @@ class RiaParser(BaseParser):
 
                 links.extend(new_links)
 
-            return links[:count]
+            return [l for l in links[:count] if l.startswith(ROOT_URL)]
         except Exception:
             self._logger.error(
                 f"Failed get links for {NEWS_ROOT_URL}",

@@ -6,7 +6,9 @@ from sqlalchemy.dialects.sqlite import insert
 from src.db.tables import *
 from dataclasses import dataclass
 from icecream import ic
-import traceback
+import logging
+import os
+from src.util.logger_formatter import LOGGER_FORMATTER
 
 
 @dataclass
@@ -43,25 +45,32 @@ class InsertParsersDTO:
 class DBApi:
     def __init__(self, conn: DBConn = None):
         self._conn = conn or DBConn()
+        self._logger = self._create_logger()
 
     def insert_news_items(self, *dtos: InsertNewsItemsDTO):
         with Session(self._conn.get_engine()) as session:
-            stmt = insert(NewsItemDBEntity).values([
-                dict(
-                    url=dto.url,
-                    title=dto.title,
-                    text=dto.text,
-                    source_id=dto.source_provider_id,
-                    published_at=dto.published_at,
+            stmt = (
+                insert(NewsItemDBEntity)
+                .values(
+                    [
+                        dict(
+                            url=dto.url,
+                            title=dto.title,
+                            text=dto.text,
+                            source_id=dto.source_provider_id,
+                            published_at=dto.published_at,
+                        )
+                        for dto in dtos
+                    ]
                 )
-                for dto in dtos
-            ]).on_conflict_do_update(
-                index_elements=['url'],
-                set_=dict(
-                    title=insert(NewsItemDBEntity).excluded.title,
-                    text=insert(NewsItemDBEntity).excluded.text,
-                    source_id=insert(NewsItemDBEntity).excluded.source_id,
-                    published_at=insert(NewsItemDBEntity).excluded.published_at,
+                .on_conflict_do_update(
+                    index_elements=["url"],
+                    set_=dict(
+                        title=insert(NewsItemDBEntity).excluded.title,
+                        text=insert(NewsItemDBEntity).excluded.text,
+                        source_id=insert(NewsItemDBEntity).excluded.source_id,
+                        published_at=insert(NewsItemDBEntity).excluded.published_at,
+                    ),
                 )
             )
             session.execute(stmt)
@@ -102,7 +111,7 @@ class DBApi:
             with Session(self._conn.get_engine()) as session:
                 return session.get(SourceProviderDBEntity, id)
         except Exception:
-            traceback.print_exc()  # todo: не ясно как обрабатывать ошибки
+            self._logger.error(f"get_source_provider error", exc_info=True)
             return None
 
     def get_sources(self, *ids) -> list[SourceDBEntity]:
@@ -113,8 +122,7 @@ class DBApi:
                     stmt = stmt.where(SourceDBEntity.id.in_(ids))
                 return session.scalars(stmt).all()
         except Exception:
-            traceback.print_exc()  # todo: не ясно как обрабатывать ошибки
-            return None
+            return []
 
     def get_parsers(self, *ids) -> list[ParserDBEntity]:
         try:
@@ -124,5 +132,16 @@ class DBApi:
                     stmt = stmt.where(ParserDBEntity.id.in_(ids))
                 return session.scalars(stmt).all()
         except Exception:
-            traceback.print_exc()  # todo: не ясно как обрабатывать ошибки
-            return None
+            self._logger.error(f"get_parsers error", exc_info=True)
+            return []
+
+    def _create_logger(self):
+        logger = logging.getLogger("database")
+        os.makedirs(os.path.dirname(f"logs/database.log"), exist_ok=True)
+        handler = logging.FileHandler(f"logs/database.log")
+        handler.setFormatter(LOGGER_FORMATTER)
+
+        logger.addHandler(handler)
+        logger.setLevel(logging.DEBUG)
+        logger.propagate = False
+        return logger

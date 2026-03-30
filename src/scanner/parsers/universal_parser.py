@@ -26,7 +26,7 @@ class UniversalParser(BaseParser):
     async def get_entities(self) -> list[NewsItem]:
         async with self._http_client:
             links = await self._get_links()
-            results = await asyncio.gather(*[self._parse_article(l) for l in links[:5]])
+            results = await asyncio.gather(*[self._parse_article(l) for l in links])
 
             self._logger.info(f"Created news items for: {json.dumps([r.url for r in results], ensure_ascii=False, indent=2)}")
 

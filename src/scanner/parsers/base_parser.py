@@ -2,10 +2,7 @@ from src.scanner.models.news_item import NewsItem
 from abc import ABC, abstractmethod
 import logging
 import os
-
-LOGGER_FORMATTER = logging.Formatter(
-    "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-)
+from src.util.logger_formatter import LOGGER_FORMATTER
 
 
 class BaseParser(ABC):

@@ -34,13 +34,13 @@ class KommersantParser(BaseParser):
             title = article_node.css_first("h1").text().replace("\n", "").strip()
 
             paragraph_nodes = article_node.css(".doc__text")
-            text = " ".join([p.text() for p in paragraph_nodes])
+            text = "\n ".join([p.text() for p in paragraph_nodes])
 
             iso_8601_time = article_node.css_first("time").attributes["datetime"]
             time = DateNormalizer.from_iso_8601(iso_8601_time)
 
             return NewsItem(url, title, text, time)
-        except:
+        except Exception:
             self._logger.error(
                 f"Failed parse article for {url}",
                 exc_info=True,
@@ -54,7 +54,7 @@ class KommersantParser(BaseParser):
             while len(links) < count:
                 links.extend(await self._get_ajax_links_after(last_link_id))
                 last_link_id = links[-1].split("/")[-1]
-            return links[:count]
+            return [l for l in links[:count] if l.startswith(DOCS_URL)]
         except Exception:
             self._logger.error(
                 f"Failed getting links for {NEWS_ROOT_URL}",
