@@ -10,4 +10,6 @@ dependencies = [
     "icecream>=2.1.10",
     "selectolax>=0.4.7",
     "sqlalchemy>=2.0.48",
+    "curl-cffi>=0.14.0",
+    "scheduler>=0.8.11",
 ]

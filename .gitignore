@@ -184,3 +184,4 @@ cython_debug/
 data/app.db
 
 tmp/news.json
+tmp/result.html

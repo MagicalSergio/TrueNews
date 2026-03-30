@@ -1,5 +1,4 @@
 import asyncio
-import traceback
 from selectolax.parser import HTMLParser
 from httpx import AsyncClient
 from src.scanner.models.news_item import NewsItem
@@ -8,6 +7,7 @@ from src.scanner.parsers.base_parser import BaseParser
 from src.util.smart_http_client import SmartHttpClient
 
 
+ROOT_URL = "https://ria.ru/"
 NEWS_ROOT_URL = "https://ria.ru/lenta/"
 NEXT_REQUEST_URL_WITH_FORM = "https://ria.ru/services/lenta/more.html?id={id}&date={date}T{time}&articlemask=lenta_common"
 
@@ -15,48 +15,65 @@ NEXT_REQUEST_URL_WITH_FORM = "https://ria.ru/services/lenta/more.html?id={id}&da
 class RiaParser(BaseParser):
     _http_client: AsyncClient
 
-    async def get_entities(self, count=25) -> list[NewsItem]:
-        async with SmartHttpClient() as http_client:
-            self._http_client = http_client
-            try:
-                links = await self._get_links(count)
-                parsing_coroutines = [self._parse_article(l) for l in links]
-                results = await asyncio.gather(*parsing_coroutines)
-                return results
-            except Exception:
-                traceback.print_exc()
-                return []
+    def __init__(self, system_name: str):
+        super().__init__(system_name)
 
-    async def _parse_article(self, url):
-        response = await self._http_client.get(url)
+        self._http_client = SmartHttpClient()
 
-        tree = HTMLParser(response.text)
-        title = tree.css_first(".article__title").text().replace("\n", "").strip()
+    async def get_entities(self, count=20) -> list[NewsItem]:
+        async with self._http_client:
+            links = await self._get_links(count)
+            results = await asyncio.gather(*[self._parse_article(l) for l in links])
+            return [r for r in results if r is not None]
 
-        paragraph_nodes = tree.css(".article__text")
-        text = " ".join([p.text() for p in paragraph_nodes])
+    async def _parse_article(self, url) -> NewsItem | None:
+        try:
+            response = await self._http_client.get(url)
 
-        iso_8601_time = tree.css_first(
-            '[property="article:published_time"]'
-        ).attributes["content"]
-        time = DateNormalizer.from_iso_8601(iso_8601_time)
+            tree = HTMLParser(response.text)
+            title = tree.css_first(".article__title").text().replace("\n", "").strip()
 
-        return NewsItem(url, title, text, time)
+            paragraph_nodes = tree.css(".article__text")
+            text = "\n ".join([p.text() for p in paragraph_nodes])
 
-    async def _get_links(self, count):
-        links, last_link_time = await self._get_links_and_last_news_time(NEWS_ROOT_URL)
+            iso_8601_time = tree.css_first(
+                '[property="article:published_time"]'
+            ).attributes["content"]
+            time = DateNormalizer.from_iso_8601(iso_8601_time)
 
-        while len(links) < count:
-            last_link_id = links[-1].split("-")[-1].split(".")[0]
-            last_link_date = links[-1].split("/")[-2]
+            return NewsItem(url, title, text, time)
+        except Exception:
+            self._logger.error(
+                f"Failed parse article for {url}",
+                exc_info=True,
+            )
+            return None
 
-            new_links, last_link_time = await self._get_links_and_last_news_time(
-                self._construct_req_url(last_link_id, last_link_date, last_link_time)
+    async def _get_links(self, count) -> list[str]:
+        try:
+            links, last_link_time = await self._get_links_and_last_news_time(
+                NEWS_ROOT_URL
             )
 
-            links.extend(new_links)
+            while len(links) < count:
+                last_link_id = links[-1].split("-")[-1].split(".")[0]
+                last_link_date = links[-1].split("/")[-2]
 
-        return links[:count]
+                new_links, last_link_time = await self._get_links_and_last_news_time(
+                    self._construct_req_url(
+                        last_link_id, last_link_date, last_link_time
+                    )
+                )
+
+                links.extend(new_links)
+
+            return [l for l in links[:count] if l.startswith(ROOT_URL)]
+        except Exception:
+            self._logger.error(
+                f"Failed get links for {NEWS_ROOT_URL}",
+                exc_info=True,
+            )
+            return []
 
     async def _get_links_and_last_news_time(self, url):
         root_page = await self._http_client.get(url)

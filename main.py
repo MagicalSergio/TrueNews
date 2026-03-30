@@ -1,42 +1,34 @@
 import asyncio
-from src.scanner.parser_loader import ParserLoader
-from icecream import ic
-from src.db.api.db_api import DBApi, InsertSourceProvidersDTO, InsertSourcesDTO
-from src.scanner.models.news_item import NewsItem
+import signal
+from src.scanner.scanner_impl import ScannerImpl
+import logging
+import sys
+
+sys.stdout.reconfigure(line_buffering=True)
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[logging.FileHandler(f"logs/root.log", "+w")],
+)
 
 
 async def main():
-    db_api = DBApi()
-    # db_api.insert_sources(
-        # InsertSourcesDTO(
-            # source_provider_id=
-        # )
-    # )
-    # db_api.insert_source_providers(
-    #     InsertSourceProvidersDTO(
-    #         system_name="ria",
-    #         public_name="РИА Новости",
-    #         canonical_url="https://ria.ru/",
-    #     )
-    # )
+    try:
+        scanner = ScannerImpl()
+        scanner.start()
 
-    
+        stop_event = asyncio.Event()
 
-    # db_api = DBApi()
-    # source_provider = db_api.get_source_provider(1)
-    # if not source_provider:
-    #     db_api.save_source_provider(SaveSourceProviderDTO("kommersant", "Коммерсант"))
-    #     source_provider = db_api.get_source_provider(1)
+        # Обработка сигналов для корректного завершения
+        loop = asyncio.get_running_loop()
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            loop.add_signal_handler(sig, stop_event.set)
 
-    # news: list[NewsItem] = []
-    # for p in ParserLoader().all():
-    #     news.extend(await p.get_entities())
-
-    # news_dto_list = [
-    #     SaveSiteNewsItemDTO(n.url, n.title, n.text, source_provider.id, n.timestamp)
-    #     for n in news
-    # ]
-    # db_api.save_news_item(*news_dto_list)
+        await stop_event.wait()  # Ждём сигнала завершения
+        scanner.stop()
+    except Exception as e:
+        logging.critical()
 
 
 if __name__ == "__main__":

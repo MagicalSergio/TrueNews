@@ -1,10 +1,14 @@
 from src.db.db_conn import DBConn
 from src.util.singleton import singleton
 from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.dialects.sqlite import insert
 from src.db.tables import *
 from dataclasses import dataclass
 from icecream import ic
-import traceback
+import logging
+import os
+from src.util.logger_formatter import LOGGER_FORMATTER
 
 
 @dataclass
@@ -25,57 +29,119 @@ class InsertSourceProvidersDTO:
 
 @dataclass
 class InsertSourcesDTO:
+    system_name: str
     source_provider_id: int
-    parser_id: int | None
+    parser_id: int | None = None
+
 
 @dataclass
 class InsertParsersDTO:
     system_name: str
     module: str
-    kwargs_json: str | None
+    kwargs_json: str | None = None
 
 
 @singleton
 class DBApi:
     def __init__(self, conn: DBConn = None):
         self._conn = conn or DBConn()
+        self._logger = self._create_logger()
 
     def insert_news_items(self, *dtos: InsertNewsItemsDTO):
         with Session(self._conn.get_engine()) as session:
-            for dto in dtos:
-                news_item = NewsItemDBEntity()
-                news_item.url = dto.url
-                news_item.title = dto.title
-                news_item.text = dto.text
-                news_item.source_id = dto.source_provider_id
-                news_item.published_at = dto.published_at
-                session.add(news_item)
+            stmt = (
+                insert(NewsItemDBEntity)
+                .values(
+                    [
+                        dict(
+                            url=dto.url,
+                            title=dto.title,
+                            text=dto.text,
+                            source_id=dto.source_provider_id,
+                            published_at=dto.published_at,
+                        )
+                        for dto in dtos
+                    ]
+                )
+                .on_conflict_do_update(
+                    index_elements=["url"],
+                    set_=dict(
+                        title=insert(NewsItemDBEntity).excluded.title,
+                        text=insert(NewsItemDBEntity).excluded.text,
+                        source_id=insert(NewsItemDBEntity).excluded.source_id,
+                        published_at=insert(NewsItemDBEntity).excluded.published_at,
+                    ),
+                )
+            )
+            session.execute(stmt)
             session.commit()
 
     def insert_sources(self, *dtos: InsertSourcesDTO):
         with Session(self._conn.get_engine()) as session:
             for dto in dtos:
                 source = SourceDBEntity()
+                source.system_name = dto.system_name
                 source.source_provider_id = dto.source_provider_id
                 source.parser_id = dto.parser_id
                 session.add(source)
             session.commit()
 
-    def insert_source_providers(self, dto: InsertSourceProvidersDTO):
+    def insert_source_providers(self, *dtos: InsertSourceProvidersDTO):
         with Session(self._conn.get_engine()) as session:
-            source_provider = SourceProviderDBEntity()
-            source_provider.system_name = dto.system_name
-            source_provider.public_name = dto.public_name
-            source_provider.canonical_url = dto.canonical_url
-            session.add(source_provider)
+            for dto in dtos:
+                source_provider = SourceProviderDBEntity()
+                source_provider.system_name = dto.system_name
+                source_provider.public_name = dto.public_name
+                source_provider.canonical_url = dto.canonical_url
+                session.add(source_provider)
             session.commit()
 
-    # def insert_parsers(self, *dtos: InsertSou)
+    def insert_parsers(self, *dtos: InsertParsersDTO):
+        with Session(self._conn.get_engine()) as session:
+            for dto in dtos:
+                parser = ParserDBEntity()
+                parser.system_name = dto.system_name
+                parser.module = dto.module
+                parser.kwargs_json = dto.kwargs_json
+                session.add(parser)
+            session.commit()
 
     def get_source_provider(self, id) -> SourceProviderDBEntity | None:
         try:
             with Session(self._conn.get_engine()) as session:
                 return session.get(SourceProviderDBEntity, id)
         except Exception:
-            traceback.print_exc()
+            self._logger.error(f"get_source_provider error", exc_info=True)
             return None
+
+    def get_sources(self, *ids) -> list[SourceDBEntity]:
+        try:
+            with Session(self._conn.get_engine()) as session:
+                stmt = select(SourceDBEntity)
+                if ids:
+                    stmt = stmt.where(SourceDBEntity.id.in_(ids))
+                return session.scalars(stmt).all()
+        except Exception:
+            return []
+
+    def get_parsers(self, *ids) -> list[ParserDBEntity]:
+        try:
+            with Session(self._conn.get_engine()) as session:
+                stmt = select(ParserDBEntity)
+                if ids:
+                    stmt = stmt.where(ParserDBEntity.id.in_(ids))
+                return session.scalars(stmt).all()
+        except Exception:
+            self._logger.error(f"get_parsers error", exc_info=True)
+            return []
+
+    def _create_logger(self):
+        logger = logging.getLogger("database")
+        os.makedirs(os.path.dirname(f"logs/database.log"), exist_ok=True)
+        handler = logging.FileHandler(f"logs/database.log")
+        handler.setFormatter(LOGGER_FORMATTER)
+
+        logger.addHandler(handler)
+        logger.setLevel(logging.DEBUG)
+        logger.propagate = False
+        return logger
