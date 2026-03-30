@@ -66,7 +66,8 @@ class KommersantParser(BaseParser):
         root_page = await self._http_client.get(NEWS_ROOT_URL)
         tree = HTMLParser(root_page.text)
         articles = tree.css("article[data-article-url]")
-        return [a.attributes["data-article-url"] for a in articles]
+        links = [a.attributes["data-article-url"] for a in articles]
+        return [l for l in links if l.startswith(DOCS_URL)]
 
     async def _get_ajax_links_after(self, id):
         response = await self._http_client.get(self._construct_ajax_req_url(id))
