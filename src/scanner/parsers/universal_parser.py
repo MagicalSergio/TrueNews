@@ -27,10 +27,13 @@ class UniversalParser(BaseParser):
         async with self._http_client:
             links = await self._get_links()
             results = await asyncio.gather(*[self._parse_article(l) for l in links])
+            filtered_results = [r for r in results if r is not None]
 
-            self._logger.info(f"Created news items for: {json.dumps([r.url for r in results], ensure_ascii=False, indent=2)}")
+            self._logger.info(
+                f"Created news items for: {json.dumps([r.url for r in filtered_results], ensure_ascii=False, indent=2)}",
+            )
 
-            return [r for r in results if r is not None]
+            return filtered_results
 
     async def _get_links(self) -> list[str]:
         try:

@@ -1,4 +1,5 @@
 import asyncio
+from asyncio.exceptions import CancelledError
 import signal
 from src.scanner.scanner_impl import ScannerImpl
 import logging
@@ -9,7 +10,10 @@ sys.stdout.reconfigure(line_buffering=True)
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    handlers=[logging.FileHandler(f"logs/root.log", "+w")],
+    handlers=[
+        logging.FileHandler(f"logs/root.log"),
+        logging.StreamHandler(sys.stdout),
+    ],
 )
 
 
@@ -27,7 +31,7 @@ async def main():
 
         await stop_event.wait()  # Ждём сигнала завершения
         scanner.stop()
-    except Exception as e:
+    except* CancelledError:
         logging.critical()
 
 

@@ -6,8 +6,7 @@ from sqlalchemy.dialects.sqlite import insert
 from src.db.tables import *
 from dataclasses import dataclass
 from icecream import ic
-import logging
-import os
+from src.util.create_logger import get_logger
 from src.util.logger_formatter import LOGGER_FORMATTER
 
 
@@ -45,7 +44,7 @@ class InsertParsersDTO:
 class DBApi:
     def __init__(self, conn: DBConn = None):
         self._conn = conn or DBConn()
-        self._logger = self._create_logger()
+        self._logger = get_logger("database")
 
     def insert_news_items(self, *dtos: InsertNewsItemsDTO):
         with Session(self._conn.get_engine()) as session:
@@ -134,14 +133,3 @@ class DBApi:
         except Exception:
             self._logger.error(f"get_parsers error", exc_info=True)
             return []
-
-    def _create_logger(self):
-        logger = logging.getLogger("database")
-        os.makedirs(os.path.dirname(f"logs/database.log"), exist_ok=True)
-        handler = logging.FileHandler(f"logs/database.log")
-        handler.setFormatter(LOGGER_FORMATTER)
-
-        logger.addHandler(handler)
-        logger.setLevel(logging.DEBUG)
-        logger.propagate = False
-        return logger

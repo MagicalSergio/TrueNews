@@ -3,6 +3,8 @@ import asyncio
 import random
 from icecream import ic
 import curl_cffi
+from src.util.create_logger import get_logger
+import logging
 
 
 USER_AGENTS = [
@@ -43,14 +45,20 @@ class SmartHttpClient(AsyncClient):
         self.session = curl_cffi.AsyncSession(
             impersonate=impersonate if impersonate is not None else "chrome",
             headers=[f"X-Forwarded-For: {self._generate_ip()}"],
+            timeout=10,
         )
+
+        self._logger = get_logger("smart_http_client")
 
     async def get(self, url):
         async with self.semaphore:
-            ic(url)
-            ic(self.session.headers)
-            await asyncio.sleep(random.uniform(1, 3))
-            return await self.session.get(url)
+            try:
+                logging.info(f"Request: {url}")
+                await asyncio.sleep(random.uniform(1, 3))
+                return await self.session.get(url)
+            except Exception:
+                logging.info(f"Request failed: {url}")
+                self._logger.error(f"Error while requesting: {url}", exc_info=True)
 
     def _generate_ip(self):
         while True:

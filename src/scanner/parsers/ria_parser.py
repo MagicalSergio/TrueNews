@@ -5,6 +5,7 @@ from src.scanner.models.news_item import NewsItem
 from src.util.date_normalizer import DateNormalizer
 from src.scanner.parsers.base_parser import BaseParser
 from src.util.smart_http_client import SmartHttpClient
+import json
 
 
 ROOT_URL = "https://ria.ru/"
@@ -17,14 +18,21 @@ class RiaParser(BaseParser):
 
     def __init__(self, system_name: str):
         super().__init__(system_name)
-
         self._http_client = SmartHttpClient()
+        self._logger.info(f"Created {system_name} parser instance")
 
     async def get_entities(self, count=20) -> list[NewsItem]:
         async with self._http_client:
             links = await self._get_links(count)
             results = await asyncio.gather(*[self._parse_article(l) for l in links])
-            return [r for r in results if r is not None]
+            filtered_results = [r for r in results if r is not None]
+
+            self._logger.info(
+                f"Created news items for: {json.dumps([r.url for r in filtered_results], ensure_ascii=False, indent=2)}"
+            )
+
+            return filtered_results
+
 
     async def _parse_article(self, url) -> NewsItem | None:
         try:
