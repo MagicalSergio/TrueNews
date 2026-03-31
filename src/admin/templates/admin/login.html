@@ -1,0 +1,13 @@
+{% extends "admin/master.html" %}
+{% block body %}
+<div style="max-width:360px;margin:80px auto">
+    <h2>Вход в админку</h2>
+    {% if error %}<p style="color:red">{{ error }}</p>{% endif %}
+    <form method="POST">
+        <input name="login" placeholder="Логин" style="display:block;width:100%;margin:8px 0;padding:8px"><br>
+        <input name="password" type="password" placeholder="Пароль"
+            style="display:block;width:100%;margin:8px 0;padding:8px">
+        <button type="submit" style="margin-top:12px;padding:8px 24px">Войти</button>
+    </form>
+</div>
+{% endblock %}

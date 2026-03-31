@@ -181,7 +181,7 @@ cython_debug/
 .cursorindexingignore
 
 # DB
-data/app.db
+data
 
 tmp/news.json
 tmp/result.html
