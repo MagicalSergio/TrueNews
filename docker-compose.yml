@@ -1,11 +1,69 @@
+name: 'TrueNews'
+
 services:
-  app:
+  app_prod:
     build: .
     image: true-news
     volumes:
       - "./src:/app/src"
+      - "./data:/app/data"
+      - "./logs:/app/logs"
       - "./main.py:/app/main.py"
+    command: [ "uv", "run", "python", "main.py" ]
+
+  admin_prod:
+    build: .
+    image: true-news-admin
+    env_file:
+      - .env
+    volumes:
+      - "./src:/app/src"
+      - "./data:/app/data"
+      - "./logs:/app/logs"
+      - "./main_admin.py:/app/main_admin.py"
+    ports:
+      - "${ADMIN_PORT_HOST}:${ADMIN_PORT_CONTAINER}"
+    environment:
+      - ADMIN_LOGIN=${ADMIN_LOGIN}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - SECRET_KEY=${SECRET_KEY}
+    command: [ "uv", "run", "gunicorn", "-w", "1", "-b", "127.0.0.1:${ADMIN_PORT_CONTAINER}", "src.admin.admin:app" ]
+
+  app_dev:
+    build: .
+    image: true-news-admin
+    env_file:
+      - .env
+    volumes:
+      - "./src:/app/src"
       - "./tmp:/app/tmp"
       - "./data:/app/data"
       - "./logs:/app/logs"
-    command: [ "nohup", "uv", "run", "python", "main.py" ]
+      - "./main_admin.py:/app/main_admin.py"
+    ports:
+      - "${ADMIN_PORT_HOST}:${ADMIN_PORT_CONTAINER}"
+    environment:
+      - ADMIN_LOGIN=${ADMIN_LOGIN}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - SECRET_KEY=${SECRET_KEY}
+    command: [ "uv", "run", "python", "main_admin.py" ]
+
+  admin_dev:
+    build: .
+    image: true-news-admin
+    env_file:
+      - .env
+    volumes:
+      - "./src:/app/src"
+      - "./tmp:/app/tmp"
+      - "./data:/app/data"
+      - "./logs:/app/logs"
+      - "./main_admin.py:/app/main_admin.py"
+    ports:
+      - "${ADMIN_PORT_HOST}:${ADMIN_PORT_CONTAINER}"
+    environment:
+      - ADMIN_LOGIN=${ADMIN_LOGIN}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - SECRET_KEY=${SECRET_KEY}
+    command: [ "uv", "run", "python", "main_admin.py" ]
+

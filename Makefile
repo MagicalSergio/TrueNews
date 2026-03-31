@@ -1,11 +1,9 @@
-run:
-	docker compose up
+prod-run:
+# 	docker compose up -d --build app_prod admin_prod
+	docker compose up -d --build admin_prod
 
-run-d:
-	docker compose up -d
+dev-build:
+	docker compose up --build app_dev admin_dev
 
-build:
-	docker compose up --build
-
-build-d:
-	docker compose up -d --build
+dev-run:
+	docker compose up app_dev admin_dev
