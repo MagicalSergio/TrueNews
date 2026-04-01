@@ -6,3 +6,6 @@ dev-build:
 
 dev-run:
 	docker compose up parser_dev admin_dev
+
+down:
+	docker compose down

@@ -4,6 +4,7 @@ import signal
 from src.scanner.scanner_impl import ScannerImpl
 import logging
 import sys
+import os
 
 sys.stdout.reconfigure(line_buffering=True)
 
@@ -19,7 +20,7 @@ logging.basicConfig(
 
 async def main():
     try:
-        scanner = ScannerImpl()
+        scanner = ScannerImpl(int(os.getenv("SCANNER_INTERVAL_MIN")))
         scanner.start()
 
         stop_event = asyncio.Event()

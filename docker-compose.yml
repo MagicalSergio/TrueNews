@@ -4,6 +4,8 @@ services:
   parser_prod:
     build: .
     image: parser_prod
+    env_file:
+      - ./.env
     volumes:
       - "./src:/app/src"
       - "./data:/app/data"
@@ -15,7 +17,7 @@ services:
     build: .
     image: parser_dev
     env_file:
-      - .env
+      - ./.env
     volumes:
       - "./src:/app/src"
       - "./data:/app/data"
@@ -28,7 +30,7 @@ services:
     build: .
     image: admin_prod
     env_file:
-      - .env
+      - ./.env
     volumes:
       - "./src:/app/src"
       - "./data:/app/data"
@@ -36,17 +38,13 @@ services:
       - "./main_admin.py:/app/main_admin.py"
     ports:
       - "${ADMIN_PORT_HOST}:${ADMIN_PORT_CONTAINER}"
-    environment:
-      - ADMIN_LOGIN=${ADMIN_LOGIN}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
-      - SECRET_KEY=${SECRET_KEY}
-    command: [ "uv", "run", "gunicorn", "-w", "1", "-b", "127.0.0.1:${ADMIN_PORT_CONTAINER}", "src.admin.admin:app" ]
+    command: [ "uv", "run", "gunicorn", "-w", "4", "-b", "0.0.0.0:${ADMIN_PORT_CONTAINER}", "src.admin.admin:app" ]
 
   admin_dev:
     build: .
     image: admin_dev
     env_file:
-      - .env
+      - ./.env
     volumes:
       - "./src:/app/src"
       - "./tmp:/app/tmp"
@@ -55,8 +53,4 @@ services:
       - "./main_admin.py:/app/main_admin.py"
     ports:
       - "${ADMIN_PORT_HOST}:${ADMIN_PORT_CONTAINER}"
-    environment:
-      - ADMIN_LOGIN=${ADMIN_LOGIN}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
-      - SECRET_KEY=${SECRET_KEY}
     command: [ "uv", "run", "python", "main_admin.py" ]

@@ -5,21 +5,26 @@ from src.db.api.db_api import DBApi
 from src.scanner.source_handler import SourceHandler
 import asyncio
 import datetime
-import logging
+from src.util.create_logger import get_logger
 
 
 class ScannerImpl(ScannerABC):
+    def __init__(self, interval: int):
+        super().__init__()
+        self._logger = get_logger("scanner")
+        self._interval = interval
+
     def start(self):
         self._scheduler = AsyncIOScheduler()
         self._scheduler.add_job(
             self.job,
             "interval",
-            minutes=10,
+            minutes=self._interval,
             misfire_grace_time=None,
             next_run_time=datetime.datetime.now(),
         )
         self._scheduler.start()
-        self._logger = logging.getLogger("scanner")
+        self._logger.info(f"Started scanner with interval: {self._interval}")
 
     def stop(self):
         self._scheduler.shutdown()
@@ -32,6 +37,9 @@ class ScannerImpl(ScannerABC):
             try:
                 handlers.append(SourceHandler(s.id))
             except Exception as e:
-                self._logger.error(f"Error creating source handler for source_id{s.id}", exc_info=True)
+                self._logger.error(
+                    f"Error creating source handler for source_id{s.id}", exc_info=True
+                )
 
         await asyncio.gather(*[h.process() for h in handlers])
+        self._logger.info("Finished scan job")
