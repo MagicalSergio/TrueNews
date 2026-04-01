@@ -4,8 +4,9 @@ from icecream import ic
 from src.db.api.db_api import DBApi
 from src.scanner.source_handler import SourceHandler
 import asyncio
-import datetime
 from src.util.create_logger import get_logger
+import datetime as dt
+from src.util.calculate_expiry import calculate_expiry
 
 
 class ScannerImpl(ScannerABC):
@@ -16,14 +17,25 @@ class ScannerImpl(ScannerABC):
 
     def start(self):
         self._scheduler = AsyncIOScheduler()
+
+        last_scan = DBApi().get_scan_timestamp()
+        next_run_time: dt.datetime
+        if not last_scan:
+            next_run_time = dt.datetime.now()
+        else:
+            next_run_time = calculate_expiry(
+                last_scan, dt.datetime.now().timestamp(), self._interval
+            )
+
         self._scheduler.add_job(
             self.job,
             "interval",
             minutes=self._interval,
             misfire_grace_time=None,
-            next_run_time=datetime.datetime.now(),
+            next_run_time=next_run_time,
         )
         self._scheduler.start()
+        DBApi().set_scan_timestamp()
         self._logger.info(f"Started scanner with interval: {self._interval}")
 
     def stop(self):
