@@ -98,6 +98,10 @@ class UniversalParser(BaseParser):
 
     def _extract_value(self, node: Node, identity: str) -> str:
         """identity: text or [attribute]"""
+
+        for s in node.css("script"):
+            s.decompose()
+
         if identity.startswith("[") and identity.endswith("]"):
             return node.attributes[f"{identity.strip("[]")}"]
         elif identity == "text":
