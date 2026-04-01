@@ -49,6 +49,7 @@ class SmartHttpClient(AsyncClient):
         )
 
         self._logger = get_logger("smart_http_client")
+        self._logger.setLevel(logging.WARN)
 
     async def get(self, url):
         async with self.semaphore:
@@ -57,7 +58,7 @@ class SmartHttpClient(AsyncClient):
                 await asyncio.sleep(random.uniform(1, 3))
                 return await self.session.get(url)
             except Exception:
-                logging.info(f"Request failed: {url}")
+                logging.error(f"Request failed: {url}")
                 self._logger.error(f"Error while requesting: {url}", exc_info=True)
 
     def _generate_ip(self):

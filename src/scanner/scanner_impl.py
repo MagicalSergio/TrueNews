@@ -30,7 +30,7 @@ class ScannerImpl(ScannerABC):
         self._scheduler.shutdown()
 
     async def job(self):
-        sources_raw = DBApi().get_sources()
+        sources_raw = DBApi().get_active_sources()
         handlers: list[SourceHandler] = []
 
         for s in sources_raw:
