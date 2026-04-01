@@ -7,5 +7,8 @@ dev-build:
 dev-run:
 	docker compose up parser_dev admin_dev
 
+dev-run-parser:
+	docker compose up parser_dev
+
 down:
 	docker compose down

@@ -6,3 +6,4 @@ from src.db.tables.table_source_providers import SourceProviderDBEntity
 from src.db.tables.table_parsers import ParserDBEntity
 from src.db.tables.table_news_items import NewsItemDBEntity
 from src.db.tables.table_sources import SourceDBEntity
+from src.db.tables.table_scanning_history import ScanningHistoryDBEntity

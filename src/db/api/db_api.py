@@ -144,3 +144,16 @@ class DBApi:
         except Exception:
             self._logger.error(f"get_parsers error", exc_info=True)
             return []
+
+    def set_scan_timestamp(self):
+        with Session(self._conn.get_engine()) as session:
+            session.add(ScanningHistoryDBEntity())
+            session.commit()
+
+    def get_scan_timestamp(self) -> int | None:
+        with Session(self._conn.get_engine()) as session:
+            stmt = select(ScanningHistoryDBEntity).order_by(
+                ScanningHistoryDBEntity.id.desc()
+            )
+            result = session.scalar(stmt)
+            return result.created_at if result else None
