@@ -7,7 +7,6 @@ from src.db.tables import *
 from dataclasses import dataclass
 from icecream import ic
 from src.util.create_logger import get_logger
-from src.util.logger_formatter import LOGGER_FORMATTER
 
 
 @dataclass
@@ -119,6 +118,18 @@ class DBApi:
                 stmt = select(SourceDBEntity)
                 if ids:
                     stmt = stmt.where(SourceDBEntity.id.in_(ids))
+                return session.scalars(stmt).all()
+        except Exception:
+            return []
+
+    def get_active_sources(self, *ids) -> list[SourceDBEntity]:
+        try:
+            with Session(self._conn.get_engine()) as session:
+                stmt = select(SourceDBEntity)
+                if ids:
+                    stmt = stmt.where(SourceDBEntity.id.in_(ids)).where(
+                        SourceDBEntity.enabled
+                    )
                 return session.scalars(stmt).all()
         except Exception:
             return []
