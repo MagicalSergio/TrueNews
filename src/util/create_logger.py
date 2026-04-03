@@ -7,7 +7,7 @@ def get_logger(system_name: str) -> logging.Logger:
     if system_name in logging.Logger.manager.loggerDict:
         return logging.getLogger(system_name)
 
-    os.makedirs("logs", exist_ok=True)
+    os.makedirs(os.path.dirname(f"logs/{system_name}.log"), exist_ok=True)
     logger = logging.getLogger(system_name)
     handler = logging.FileHandler(f"logs/{system_name}.log")
     handler.setFormatter(LOGGER_FORMATTER)
