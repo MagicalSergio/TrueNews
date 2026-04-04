@@ -1,5 +1,5 @@
 from .main_base import MainBase
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey, Integer, String, Boolean
 import time
 
@@ -14,6 +14,7 @@ class SourceDBEntity(MainBase):
         ForeignKey("source_providers.id", use_alter=True),
         nullable=False,
     )
+    source_provider: Mapped["SourceProviderDBEntity"] = relationship(back_populates="sources")
     parser_id: Mapped[int] = mapped_column(
         Integer,
         ForeignKey("parsers.id", use_alter=True),

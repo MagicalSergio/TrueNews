@@ -10,5 +10,8 @@ dev-run:
 dev-run-parser:
 	docker compose up parser_dev
 
+dev-run-admin:
+	docker compose up admin_dev
+
 down:
 	docker compose down
