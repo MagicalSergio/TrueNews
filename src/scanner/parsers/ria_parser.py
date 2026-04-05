@@ -19,7 +19,6 @@ class RiaParser(BaseParser):
     def __init__(self, system_name: str):
         super().__init__(system_name)
         self._http_client = SmartHttpClient()
-        self._logger.info(f"Created {system_name} parser instance")
 
     async def get_entities(self, count=20) -> list[NewsItem]:
         async with self._http_client:

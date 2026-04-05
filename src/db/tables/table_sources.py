@@ -14,11 +14,16 @@ class SourceDBEntity(MainBase):
         ForeignKey("source_providers.id", use_alter=True),
         nullable=False,
     )
-    source_provider: Mapped["SourceProviderDBEntity"] = relationship(back_populates="sources")
+    source_provider: Mapped["SourceProviderDBEntity"] = relationship(
+        back_populates="sources"
+    )
     parser_id: Mapped[int] = mapped_column(
         Integer,
         ForeignKey("parsers.id", use_alter=True),
         nullable=True,
+    )
+    parser: Mapped["ParserDBEntity"] = relationship(
+        back_populates="source"
     )
     created_at: Mapped[int] = mapped_column(
         nullable=False,
@@ -30,3 +35,8 @@ class SourceDBEntity(MainBase):
         server_default="1",
         nullable=False,
     )
+
+    def __repr__(self):
+        return (
+            f"Source #{self.id}: {self.system_name}; provider: {self.source_provider}"
+        )

@@ -1,6 +1,6 @@
 from src.db.db_conn import DBConn
 from src.util.singleton import singleton
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import select
 from sqlalchemy.dialects.sqlite import insert
 from src.db.tables import *
@@ -46,6 +46,9 @@ class DBApi:
         self._logger = get_logger("database")
 
     def insert_news_items(self, *dtos: InsertNewsItemsDTO):
+        if not dtos:
+            return
+
         with Session(self._conn.get_engine()) as session:
             stmt = (
                 insert(NewsItemDBEntity)
@@ -125,11 +128,15 @@ class DBApi:
     def get_active_sources(self, *ids) -> list[SourceDBEntity]:
         try:
             with Session(self._conn.get_engine()) as session:
-                stmt = select(SourceDBEntity)
-                if ids:
-                    stmt = stmt.where(SourceDBEntity.id.in_(ids)).where(
-                        SourceDBEntity.enabled
+                stmt = (
+                    select(SourceDBEntity).options(
+                        selectinload(SourceDBEntity.source_provider)
                     )
+                ).where(SourceDBEntity.enabled)
+
+                if ids:
+                    stmt = stmt.where(SourceDBEntity.id.in_(ids))
+
                 return session.scalars(stmt).all()
         except Exception:
             return []

@@ -19,4 +19,4 @@ class SourceProviderDBEntity(MainBase):
     )
 
     def __repr__(self):
-        return f"ID: {self.id};\n system_name: {self.system_name}, public_name: {self.public_name}, canonical_url: {self.canonical_url}"
+        return f"Provider #{self.id}: {self.public_name} ({self.system_name}): {self.canonical_url}"

@@ -28,11 +28,12 @@ class ScannerImpl(ScannerABC):
             )
 
         self._scheduler.add_job(
-            self.job,
+            self._job,
             "interval",
             minutes=self._interval,
             misfire_grace_time=None,
-            next_run_time=next_run_time,
+            # next_run_time=next_run_time,
+            next_run_time=dt.datetime.now(),
         )
         self._scheduler.start()
         DBApi().set_scan_timestamp()
@@ -41,7 +42,7 @@ class ScannerImpl(ScannerABC):
     def stop(self):
         self._scheduler.shutdown()
 
-    async def job(self):
+    async def _job(self):
         sources_raw = DBApi().get_active_sources()
         handlers: list[SourceHandler] = []
 
@@ -53,5 +54,6 @@ class ScannerImpl(ScannerABC):
                     f"Error creating source handler for source_id{s.id}", exc_info=True
                 )
 
+        ic(handlers)
         await asyncio.gather(*[h.process() for h in handlers])
         self._logger.info("Finished scan job")

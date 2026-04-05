@@ -14,3 +14,4 @@ class BaseParser(ABC):
         super().__init__()
         self._system_name = system_name
         self._logger = get_logger(self._system_name)
+        self._logger.info(f"Created {system_name} parser instance")
