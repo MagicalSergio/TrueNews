@@ -69,4 +69,4 @@ admin.add_view(SecureModelView(SourceDBEntity, db_session, name="Sources"))
 
 
 def run():
-    app.run(port=os.getenv('ADMIN_PORT_CONTAINER'), debug=False, host="0.0.0.0")
+    app.run(port=os.getenv('ADMIN_PORT_CONTAINER'), debug=False, host="127.0.0.1")

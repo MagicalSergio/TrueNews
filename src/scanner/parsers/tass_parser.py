@@ -1,12 +1,11 @@
 from .base_parser import BaseParser
-from src.util.smart_http_client import SmartHttpClient
 from src.scanner.models.news_item import NewsItem
 from icecream import ic
-import asyncio
-import json
-from selectolax.parser import HTMLParser, Node
+from selectolax.parser import HTMLParser
 from playwright.async_api import async_playwright
 from src.util.smart_browser import SmartBrowser
+from src.util.date_normalizer import DateNormalizer
+import json
 
 LINKS_API_URL = "https://tass.ru/tgap/api/v1/messages/search?lang=ru&limit=50"
 ROOT_URL = "https://tass.ru"
@@ -19,16 +18,13 @@ class TassParser(BaseParser):
 
     async def get_entities(self) -> list[NewsItem]:
         async with self._browser:
-            links = (await self._get_links())[:1]
+            links = await self._get_links()
             parsed_articles = [await self._parse_article(l) for l in links]
-            return [a for a in parsed_articles if a is not None]
-
-    # @dataclass
-    # class NewsItem:
-    #     url: str
-    #     title: str
-    #     text: str
-    #     timestamp: int
+            filtered_articles = [a for a in parsed_articles if a is not None]
+            self._logger.info(
+                f"Created news items for: {json.dumps([a.url for a in filtered_articles], ensure_ascii=False, indent=2,)}",
+            )
+            return filtered_articles
 
     async def _parse_article(self, url) -> NewsItem | None:
         try:
@@ -39,18 +35,20 @@ class TassParser(BaseParser):
             article = tree.css_first("article")
             title = article.css_first("h1").text()
 
+            time: str
+            for s in article.css("span"):
+                if s.attrs["class"].startswith("Date_"):
+                    time = s.text()
+                    break
+
             for f in tree.css("figure"):
                 f.decompose()
             for d in tree.css("article > div"):
                 d.decompose()
 
             text = " ".join([p.text() for p in article.css("p")])
-            # timestamp
-            ic(url)
-            ic(title)
-            ic(text)
-            # ic(text)
-            return None
+
+            return NewsItem(url, title, text, DateNormalizer.normalize(time))
         except Exception:
             self._logger.error(
                 f"Failed parsing article for {self._system_name}, url: {url}",
