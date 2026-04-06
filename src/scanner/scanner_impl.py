@@ -44,7 +44,6 @@ class ScannerImpl(ScannerABC):
 
     async def _job(self):
         sources_raw = DBApi().get_active_sources()
-        ic(sources_raw)
         handlers: list[SourceHandler] = []
 
         for s in sources_raw:
@@ -55,6 +54,5 @@ class ScannerImpl(ScannerABC):
                     f"Error creating source handler for source_id{s.id}", exc_info=True
                 )
 
-        ic(handlers)
         await asyncio.gather(*[h.process() for h in handlers])
         self._logger.info("Finished scan job")
