@@ -15,3 +15,6 @@ dev-run-admin:
 
 down:
 	docker compose down
+
+raw-run:
+	uv run --env-file .env python main.py
