@@ -17,4 +17,12 @@ down:
 	docker compose down
 
 raw-run:
+	uv run --env-file .env python main.py & \
+	uv run --env-file .env python main_admin.py & \
+	wait
+
+raw-run-parser:
 	uv run --env-file .env python main.py
+
+raw-run-admin:
+	uv run --env-file .env python main_admin.py

@@ -139,6 +139,7 @@ class DBApi:
 
                 return session.scalars(stmt).all()
         except Exception:
+            self._logger.error("Error get_active_sources", exc_info=True)
             return []
 
     def get_parsers(self, *ids) -> list[ParserDBEntity]:

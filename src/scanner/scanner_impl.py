@@ -44,6 +44,7 @@ class ScannerImpl(ScannerABC):
 
     async def _job(self):
         sources_raw = DBApi().get_active_sources()
+        ic(sources_raw)
         handlers: list[SourceHandler] = []
 
         for s in sources_raw:
