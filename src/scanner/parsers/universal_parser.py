@@ -21,8 +21,6 @@ class UniversalParser(BaseParser):
 
         self._http_client = SmartHttpClient(self._impersonate)
 
-        self._logger.info(f"Created {system_name} parser instance")
-
     async def get_entities(self) -> list[NewsItem]:
         async with self._http_client:
             links = await self._get_links()

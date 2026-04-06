@@ -1,5 +1,5 @@
 from .main_base import MainBase
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String
 import time
 
@@ -14,3 +14,9 @@ class SourceProviderDBEntity(MainBase):
     created_at: Mapped[int] = mapped_column(
         nullable=False, default=lambda: int(time.time())
     )
+    sources: Mapped[list["SourceDBEntity"]] = relationship(
+        back_populates="source_provider"
+    )
+
+    def __repr__(self):
+        return f"Provider #{self.id}: {self.public_name} ({self.system_name}): {self.canonical_url}"

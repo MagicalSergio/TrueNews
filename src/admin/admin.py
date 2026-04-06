@@ -1,9 +1,7 @@
 from flask import Flask, redirect, url_for, request, session
 from flask_admin import Admin, AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
-from sqlalchemy import create_engine, Column, Integer, String, JSON
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
-from functools import wraps
+from sqlalchemy.orm import sessionmaker
 from src.db.db_conn import DBConn
 from src.db.tables import *
 from icecream import ic
@@ -71,4 +69,4 @@ admin.add_view(SecureModelView(SourceDBEntity, db_session, name="Sources"))
 
 
 def run():
-    app.run(port=os.getenv('ADMIN_PORT_CONTAINER'), debug=False, host="0.0.0.0")
+    app.run(port=os.getenv('ADMIN_PORT_CONTAINER'), debug=False, host="127.0.0.1")
