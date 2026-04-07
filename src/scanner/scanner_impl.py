@@ -40,7 +40,7 @@ class ScannerImpl(ScannerABC):
         self._logger.info(f"Started scanner with interval: {self._interval}")
 
     def stop(self):
-        self._scheduler.shutdown()
+        self._scheduler.shutdown(wait=True)
 
     async def _job(self):
         sources_raw = DBApi().get_active_sources()

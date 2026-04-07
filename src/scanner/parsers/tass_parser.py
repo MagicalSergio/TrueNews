@@ -2,7 +2,6 @@ from .base_parser import BaseParser
 from src.scanner.models.news_item import NewsItem
 from icecream import ic
 from selectolax.parser import HTMLParser
-from playwright.async_api import async_playwright
 from src.util.smart_browser import SmartBrowser
 from src.util.date_normalizer import DateNormalizer
 import json

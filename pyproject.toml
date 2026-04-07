@@ -16,4 +16,7 @@ dependencies = [
     "flask-admin>=2.0.2",
     "gunicorn>=25.3.0",
     "playwright>=1.58.0",
+    "pyvirtualdisplay>=3.0",
+    "pillow>=12.2.0",
+    "easyprocess>=1.1",
 ]

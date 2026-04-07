@@ -32,8 +32,8 @@ async def main():
 
         await stop_event.wait()  # Ждём сигнала завершения
         scanner.stop()
-    except* CancelledError:
-        logging.critical()
+    except CancelledError:
+        logging.critical("Exited")
 
 
 if __name__ == "__main__":

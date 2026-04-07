@@ -4,6 +4,7 @@ import asyncio
 import random
 import logging
 from src.util.create_logger import get_logger
+from pyvirtualdisplay import Display
 
 
 class SmartBrowser:
@@ -11,10 +12,16 @@ class SmartBrowser:
     _playwright: Playwright
     _browser: Browser
     _context: BrowserContext
-    _semaphore = asyncio.Semaphore()
+    _semaphore: asyncio.Semaphore
+    _display: Display
     _logger = get_logger("smart_browser")
 
     async def __aenter__(self):
+        self._semaphore = asyncio.Semaphore(1)
+
+        self._display = Display(size=(1920, 1080))
+        self._display.start()
+        
         self._playwright = await async_playwright().start()
         self._browser = await self._playwright.chromium.launch(
             channel="chrome",
@@ -29,6 +36,7 @@ class SmartBrowser:
         await self._context.close()
         await self._browser.close()
         await self._playwright.stop()
+        self._display.stop()
 
     async def get(self, url: str):
         async with self._semaphore:
