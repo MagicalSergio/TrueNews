@@ -32,8 +32,7 @@ class ScannerImpl(ScannerABC):
             "interval",
             minutes=self._interval,
             misfire_grace_time=None,
-            # next_run_time=next_run_time,
-            next_run_time=dt.datetime.now(),
+            next_run_time=next_run_time,
         )
         self._scheduler.start()
         DBApi().set_scan_timestamp()
