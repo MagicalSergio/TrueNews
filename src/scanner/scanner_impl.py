@@ -7,6 +7,7 @@ import asyncio
 from src.util.create_logger import get_logger
 import datetime as dt
 from src.util.calculate_expiry import calculate_expiry
+import json
 
 
 class ScannerImpl(ScannerABC):
@@ -24,7 +25,9 @@ class ScannerImpl(ScannerABC):
             next_run_time = dt.datetime.now()
         else:
             next_run_time = calculate_expiry(
-                last_scan, dt.datetime.now().timestamp(), self._interval
+                last_scan,
+                dt.datetime.now().timestamp(),
+                self._interval,
             )
 
         self._scheduler.add_job(
@@ -43,6 +46,13 @@ class ScannerImpl(ScannerABC):
 
     async def _job(self):
         sources_raw = DBApi().get_active_sources()
+        if not len(sources_raw):
+            self._logger.info("No enabled sources found")
+            return
+
+        self._logger.info(
+            f"Sources found: {json.dumps([s.system_name for s in sources_raw])}"
+        )
         handlers: list[SourceHandler] = []
 
         for s in sources_raw:
@@ -50,7 +60,8 @@ class ScannerImpl(ScannerABC):
                 handlers.append(SourceHandler(s.id))
             except Exception as e:
                 self._logger.error(
-                    f"Error creating source handler for source_id{s.id}", exc_info=True
+                    f"Error creating source handler for source_id{s.id}",
+                    exc_info=True,
                 )
 
         await asyncio.gather(*[h.process() for h in handlers])

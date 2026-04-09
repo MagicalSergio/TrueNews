@@ -33,6 +33,9 @@ class DateNormalizer:
         if re.match(r"^\d{2}:\d{2}$", date_str):
             return DateNormalizer.from_time_only(date_str, base_date)
 
+        if re.match(r"^\d{2}:\d{2} \d{2}\.\d{2}\.\d{4}$", date_str):
+            return DateNormalizer.from_custom_format(date_str)
+
         raise ValueError(f"Неизвестный формат даты: {date_str}")
 
     # 2026-03-26T04:05:17+03:00  ->  1774487117
@@ -65,4 +68,13 @@ class DateNormalizer:
         day, month, time = parts
         hour, minute = time.split(":")
         dt = datetime(base.year, MONTHS[month], int(day), int(hour), int(minute))
+        return int(dt.timestamp())
+
+    # 12:50 09.04.2026 -> 1774487117
+    @staticmethod
+    def from_custom_format(date_str: str) -> int:
+        time_str, date_str = date_str.split()
+        hour, minute = time_str.split(":")
+        day, month, year = date_str.split(".")
+        dt = datetime(int(year), int(month), int(day), int(hour), int(minute))
         return int(dt.timestamp())
