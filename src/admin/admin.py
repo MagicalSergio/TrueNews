@@ -1,5 +1,5 @@
-from flask import Flask, redirect, url_for, request, session
-from flask_admin import Admin, AdminIndexView, expose
+from flask import Flask, redirect, url_for, request, session, views
+from flask_admin import Admin, AdminIndexView, expose, BaseView
 from flask_admin.contrib.sqla import ModelView
 from sqlalchemy.orm import sessionmaker
 from src.db.db_conn import DBConn
@@ -53,6 +53,12 @@ class SecureModelView(ModelView):
         return redirect(url_for("admin.login"))
 
 
+class TestView(BaseView):
+    @expose("/test")
+    def index(self):
+        return self.render("admin/test.html")
+
+
 app = Flask(__name__, template_folder=os.path.abspath("./src/admin/templates/"))
 app.secret_key = os.environ.get("SECRET_KEY", "super-secret-change-me")
 
@@ -66,7 +72,8 @@ admin.add_view(
     SecureModelView(SourceProviderDBEntity, db_session, name="SourceProviders")
 )
 admin.add_view(SecureModelView(SourceDBEntity, db_session, name="Sources"))
+admin.add_view(TestView(name="My View"))
 
 
 def run():
-    app.run(port=os.getenv('ADMIN_PORT_CONTAINER'), debug=False, host="127.0.0.1")
+    app.run(port=os.getenv("ADMIN_PORT_CONTAINER"), debug=False, host="127.0.0.1")

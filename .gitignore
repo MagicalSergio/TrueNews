@@ -185,3 +185,5 @@ data
 
 tmp/news.json
 tmp/result.html
+
+.idea

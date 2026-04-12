@@ -31,7 +31,7 @@ class ScannerImpl(ScannerABC):
             )
 
         self._scheduler.add_job(
-            self._job,
+            self._do_scan,
             "interval",
             minutes=self._interval,
             misfire_grace_time=None,
@@ -44,7 +44,7 @@ class ScannerImpl(ScannerABC):
     def stop(self):
         self._scheduler.shutdown(wait=True)
 
-    async def _job(self):
+    async def _do_scan(self):
         sources_raw = DBApi().get_active_sources()
         if not len(sources_raw):
             self._logger.info("No enabled sources found")
